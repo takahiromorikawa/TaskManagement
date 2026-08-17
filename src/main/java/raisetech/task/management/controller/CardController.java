@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import raisetech.task.management.entity.Card;
+import raisetech.task.management.controller.dto.CardResponse;
 import raisetech.task.management.service.CardService;
 
 @RestController
@@ -20,13 +20,16 @@ public class CardController {
     }
 
     @GetMapping
-    public List<Card> getAllCards() {
-        return cardService.getAllCards();
+    public List<CardResponse> getAllCards() {
+        return cardService.getAllCards().stream()
+                .map(CardResponse::from)
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Card> getCardById(@PathVariable Long id) {
+    public ResponseEntity<CardResponse> getCardById(@PathVariable Long id) {
         return cardService.getCardById(id)
+                .map(CardResponse::from)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
