@@ -1,0 +1,34 @@
+:root {
+  --bg: #eef1f6;
+  --surface: #ffffff;
+  --surface-2: #e6eaf1;
+  --border: #cdd4df;
+  --text: #1b2233;
+  --text-muted: #5c6579;
+
+  --status-todo: #7c8698;
+  --status-doing: #c97a2e;
+  --status-done: #2f8f5b;
+
+  --priority-high: #b23b3b;
+  --priority-high-soft: #f7e7e6;
+  --priority-mid: #c97a2e;
+  --priority-mid-soft: #f6e9db;
+  --priority-low: #5c6579;
+  --priority-low-soft: #e6eaf1;
+
+  --danger: #b23b3b;
+
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
