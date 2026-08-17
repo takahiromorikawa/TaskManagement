@@ -31,7 +31,7 @@ sequenceDiagram
     participant API as CardController
     participant SVC as CardService
     participant REPO as CardRepository
-    participant DB as H2 DB
+    participant DB as PostgreSQL DB
 
     User->>FE: タイトル・優先度・期限を入力して「作成」
     FE->>API: POST /cards { title, priority, dueDate }
@@ -54,7 +54,7 @@ sequenceDiagram
     participant API as CardController
     participant SVC as CardService
     participant REPO as CardRepository
-    participant DB as H2 DB
+    participant DB as PostgreSQL DB
 
     User->>FE: カンバンボード画面を開く
     FE->>API: GET /cards
@@ -77,7 +77,7 @@ sequenceDiagram
     participant API as CardController
     participant SVC as CardService
     participant REPO as CardRepository
-    participant DB as H2 DB
+    participant DB as PostgreSQL DB
 
     User->>FE: カードを別の列にドラッグ&ドロップ
     FE->>API: PUT /cards/{id}/status { status }
@@ -97,12 +97,6 @@ sequenceDiagram
 
 移動先が前の列（例: 完了→進行中）であっても同じAPIで対応する。ステータスの前後関係による制約はない。
 
-### UC5: 並び替え（クライアント側のみ）
-
-並び替え（追加順／期限順／優先度順への切り替え、同一列内の手動ドラッグ並び替え）はAPI通信を伴わない。
-`GET /cards`（UC2）で取得済みのカード一覧を、フロントエンドの状態として保持したまま並べ替えるのみで完結する。
-画面を再読み込みすると、並び替え条件は初期値（追加順）に戻る。
-
 ### UC4: カード削除
 
 ```mermaid
@@ -112,7 +106,7 @@ sequenceDiagram
     participant API as CardController
     participant SVC as CardService
     participant REPO as CardRepository
-    participant DB as H2 DB
+    participant DB as PostgreSQL DB
 
     User->>FE: 「削除」→確認ダイアログで「削除」
     FE->>API: DELETE /cards/{id}
@@ -125,3 +119,9 @@ sequenceDiagram
     API-->>FE: 204 No Content
     FE-->>User: 一覧からカードを削除
 ```
+
+### UC5: 並び替え（クライアント側のみ）
+
+並び替え（追加順／期限順／優先度順への切り替え、同一列内の手動ドラッグ並び替え）はAPI通信を伴わない。
+`GET /cards`（UC2）で取得済みのカード一覧を、フロントエンドの状態として保持したまま並べ替えるのみで完結する。
+画面を再読み込みすると、並び替え条件は初期値（追加順）に戻る。

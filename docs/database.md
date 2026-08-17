@@ -34,4 +34,4 @@ erDiagram
     }
 ```
 
-DBの物理構成（H2インメモリ、永続化しない旨など）は[要件定義書の非機能要件](requirements.md#非機能要件)を参照。
+DBの物理構成（PostgreSQL、永続化の方針など）は[要件定義書の非機能要件](requirements.md#非機能要件)と[技術スタック](tech-stack.md)を参照。
