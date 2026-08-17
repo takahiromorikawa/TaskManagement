@@ -6,13 +6,16 @@
 
 | メソッド | URL | 内容 |
 |---|---|---|
-| GET | /cards | カード一覧取得 |
+| GET | /cards | カード一覧取得（id昇順＝作成順で返却） |
 | GET | /cards/{id} | カード詳細取得 |
-| POST | /cards | カード新規作成 |
-| PUT | /cards/{id}/status | ステータス変更 |
+| POST | /cards | カード新規作成（title・priority・dueDateを指定） |
+| PUT | /cards/{id}/status | ステータス変更（リクエストボディで指定した任意のステータスに変更） |
 | DELETE | /cards/{id} | カード削除 |
 
 データ項目（Cardのフィールド）は[データベース設計](database.md)を参照。
+
+「期限順」「優先度順」の並び替え、および同一列内の手動並び替えは、いずれもフロントエンド側で
+`GET /cards` の結果を並べ替えるのみで実現する。並び替え専用のAPI・クエリパラメータは設けない。
 
 ## シーケンス図
 
@@ -30,9 +33,9 @@ sequenceDiagram
     participant REPO as CardRepository
     participant DB as H2 DB
 
-    User->>FE: タイトルを入力して「作成」
-    FE->>API: POST /cards { title }
-    API->>SVC: createCard(title)
+    User->>FE: タイトル・優先度・期限を入力して「作成」
+    FE->>API: POST /cards { title, priority, dueDate }
+    API->>SVC: createCard(title, priority, dueDate)
     SVC->>REPO: save(Card)
     REPO->>DB: INSERT
     DB-->>REPO: 採番されたid
@@ -65,7 +68,7 @@ sequenceDiagram
     FE-->>User: ステータスごとに3列へ振り分けて表示
 ```
 
-### UC3: ステータス変更
+### UC3: ステータス変更（ドラッグ&ドロップ）
 
 ```mermaid
 sequenceDiagram
@@ -76,14 +79,14 @@ sequenceDiagram
     participant REPO as CardRepository
     participant DB as H2 DB
 
-    User->>FE: カードの「→」をクリック
-    FE->>API: PUT /cards/{id}/status
-    API->>SVC: updateStatus(id)
+    User->>FE: カードを別の列にドラッグ&ドロップ
+    FE->>API: PUT /cards/{id}/status { status }
+    API->>SVC: updateStatus(id, status)
     SVC->>REPO: findById(id)
     REPO->>DB: SELECT
     DB-->>REPO: Card
     REPO-->>SVC: Card
-    SVC->>SVC: 次のステータスを算出
+    SVC->>SVC: statusをリクエスト値で上書き
     SVC->>REPO: save(Card)
     REPO->>DB: UPDATE
     REPO-->>SVC: Card
@@ -91,6 +94,14 @@ sequenceDiagram
     API-->>FE: 200 OK + Card
     FE-->>User: 該当する列へ移動して表示
 ```
+
+移動先が前の列（例: 完了→進行中）であっても同じAPIで対応する。ステータスの前後関係による制約はない。
+
+### UC5: 並び替え（クライアント側のみ）
+
+並び替え（追加順／期限順／優先度順への切り替え、同一列内の手動ドラッグ並び替え）はAPI通信を伴わない。
+`GET /cards`（UC2）で取得済みのカード一覧を、フロントエンドの状態として保持したまま並べ替えるのみで完結する。
+画面を再読み込みすると、並び替え条件は初期値（追加順）に戻る。
 
 ### UC4: カード削除
 
