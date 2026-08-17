@@ -4,7 +4,7 @@
 
 ## バックエンド
 
-- 言語：Java 21
+- 言語：Java 25
 - フレームワーク：Spring Boot 4.1
 - ビルドツール：Gradle
 - データアクセス：Spring Data JPA
