@@ -1,0 +1,29 @@
+# CLAUDE.md
+
+## Git ワークフロー（厳守）
+
+このプロジェクトでは、`main`ブランチへの直接pushをGitHub側のブランチ保護で禁止している。以下のルールに従うこと。
+
+### 実装・設定変更を伴う作業（コード、build.gradle、application.propertiesなど）
+
+1. `gh issue create` で対応するGitHub Issueを作成する
+2. Issueに対応するブランチを作成する: `<種別>/<issue番号>-<概要>`
+   - 種別: `feature`（機能追加） / `fix`（バグ修正） / `chore`（依存関係・設定変更などそれ以外）
+   - 例: `feature/12-add-card-entity`
+3. そのブランチ上で変更を行い、コミットする
+4. `gh pr create` でPull Requestを作成する。本文に `Closes #<issue番号>` を含め、Issueと紐づける
+5. `gh pr merge` でPull Request経由でmainにマージする。直接pushはしない
+
+### ドキュメントのみの変更（`docs/*.md` など）
+
+- Issue作成は不要
+- ただし`main`への直接pushはブランチ保護により拒否されるため、`docs/<概要>`のようなブランチを作成し、Pull Request経由でマージする
+
+### 禁止事項
+
+- `main`ブランチへの直接push
+- ドキュメントのみの変更を除き、Issueを作成せずに作業ブランチを作ること
+
+### Pull Requestのマージについて
+
+このリポジトリはPRを必須としているが、レビュー承認は必須にしていない（一人開発のため）。作成したPRは自分自身でマージしてよい。
