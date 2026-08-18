@@ -51,24 +51,30 @@ function App() {
     }
   }
 
-  function computeReorderedCards(prev: Card[], draggedCardId: number, targetCardId: number): Card[] {
+  function computeReorderedCards(
+    prev: Card[],
+    draggedCardId: number,
+    targetCardId: number,
+    position: "before" | "after",
+  ): Card[] {
     const fromIndex = prev.findIndex((card) => card.id === draggedCardId);
     if (fromIndex === -1) return prev;
 
     const next = [...prev];
     const [dragged] = next.splice(fromIndex, 1);
-    const toIndex = next.findIndex((card) => card.id === targetCardId);
-    if (toIndex === -1) return prev;
-    next.splice(toIndex, 0, dragged);
+    const targetIndex = next.findIndex((card) => card.id === targetCardId);
+    if (targetIndex === -1) return prev;
+    const insertIndex = position === "after" ? targetIndex + 1 : targetIndex;
+    next.splice(insertIndex, 0, dragged);
     return next;
   }
 
-  async function handleDropOnCard(draggedCardId: number, targetCard: Card) {
+  async function handleDropOnCard(draggedCardId: number, targetCard: Card, position: "before" | "after") {
     const dragged = cards.find((card) => card.id === draggedCardId);
     if (!dragged || dragged.id === targetCard.id) return;
 
     if (dragged.status === targetCard.status) {
-      const reordered = computeReorderedCards(cards, draggedCardId, targetCard.id);
+      const reordered = computeReorderedCards(cards, draggedCardId, targetCard.id, position);
       if (reordered === cards) return;
       setCards(reordered);
 
