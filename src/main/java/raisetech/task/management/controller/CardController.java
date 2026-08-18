@@ -1,12 +1,18 @@
 package raisetech.task.management.controller;
 
+import jakarta.validation.Valid;
+import java.net.URI;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import raisetech.task.management.controller.dto.CardCreateRequest;
 import raisetech.task.management.controller.dto.CardResponse;
+import raisetech.task.management.entity.Card;
 import raisetech.task.management.service.CardService;
 
 @RestController
@@ -32,5 +38,12 @@ public class CardController {
                 .map(CardResponse::from)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public ResponseEntity<CardResponse> createCard(@Valid @RequestBody CardCreateRequest request) {
+        Card card = cardService.createCard(request.title(), request.priority(), request.dueDate());
+        CardResponse response = CardResponse.from(card);
+        return ResponseEntity.created(URI.create("/cards/" + card.getId())).body(response);
     }
 }
