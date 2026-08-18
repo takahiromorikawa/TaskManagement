@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -191,5 +192,59 @@ class CardControllerTest {
                 .hasStatus(400);
 
         verify(cardService, org.mockito.Mockito.never()).updateStatus(any(), any());
+    }
+
+    @Test
+    void 並び替えに成功すると200と並び替え後のカード一覧を返す() {
+        Card first = new Card();
+        first.setId(2L);
+        first.setTitle("後のカード");
+        first.setStatus(Status.TODO);
+        first.setPriority(Priority.MID);
+
+        Card second = new Card();
+        second.setId(1L);
+        second.setTitle("先のカード");
+        second.setStatus(Status.TODO);
+        second.setPriority(Priority.MID);
+
+        when(cardService.reorderCards(eq(Status.TODO), eq(List.of(2L, 1L))))
+                .thenReturn(Optional.of(List.of(first, second)));
+
+        mockMvcTester.put().uri("/cards/reorder")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"status":"TODO","cardIds":[2,1]}
+                        """)
+                .assertThat()
+                .hasStatus(200)
+                .bodyJson()
+                .extractingPath("$[0].id").isEqualTo(2);
+    }
+
+    @Test
+    void 並び替えでステータスが一致しないカードが含まれる場合は400を返す() {
+        when(cardService.reorderCards(eq(Status.TODO), eq(List.of(1L, 3L)))).thenReturn(Optional.empty());
+
+        mockMvcTester.put().uri("/cards/reorder")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"status":"TODO","cardIds":[1,3]}
+                        """)
+                .assertThat()
+                .hasStatus(400);
+    }
+
+    @Test
+    void 並び替えでcardIdsが空の場合は400を返しサービスを呼び出さない() {
+        mockMvcTester.put().uri("/cards/reorder")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"status":"TODO","cardIds":[]}
+                        """)
+                .assertThat()
+                .hasStatus(400);
+
+        verify(cardService, org.mockito.Mockito.never()).reorderCards(any(), any());
     }
 }

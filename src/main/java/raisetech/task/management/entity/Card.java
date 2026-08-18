@@ -32,4 +32,6 @@ public class Card {
     private Priority priority;
 
     private LocalDate dueDate;
+
+    private Long position;
 }

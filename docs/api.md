@@ -6,17 +6,18 @@
 
 | メソッド | URL | 内容 |
 |---|---|---|
-| GET | /cards | カード一覧取得（id昇順＝作成順で返却） |
+| GET | /cards | カード一覧取得（position昇順＝表示順で返却） |
 | GET | /cards/{id} | カード詳細取得 |
 | POST | /cards | カード新規作成（title・priority・dueDateを指定） |
 | PUT | /cards/{id} | カード編集（title・priority・dueDateを更新。statusは変更しない） |
 | PUT | /cards/{id}/status | ステータス変更（リクエストボディで指定した任意のステータスに変更） |
+| PUT | /cards/reorder | 同一列内の並び替え（status・並び替え後の全cardIdsを指定してpositionを振り直す） |
 | DELETE | /cards/{id} | カード削除 |
 
 データ項目（Cardのフィールド）は[データベース設計](database.md)を参照。
 
-「期限順」「優先度順」の並び替え、および同一列内の手動並び替えは、いずれもフロントエンド側で
-`GET /cards` の結果を並べ替えるのみで実現する。並び替え専用のAPI・クエリパラメータは設けない。
+「期限順」「優先度順」への切り替えはフロントエンド側で `GET /cards` の結果を並べ替えるのみで実現し、
+API通信・永続化は行わない。同一列内の手動ドラッグ並び替えは `PUT /cards/reorder` でサーバーに保存する。
 
 ## シーケンス図
 
@@ -60,7 +61,7 @@ sequenceDiagram
     User->>FE: カンバンボード画面を開く
     FE->>API: GET /cards
     API->>SVC: getAllCards()
-    SVC->>REPO: findAll()
+    SVC->>REPO: findAllByOrderByPositionAsc()
     REPO->>DB: SELECT
     DB-->>REPO: カード一覧
     REPO-->>SVC: List<Card>
@@ -121,11 +122,39 @@ sequenceDiagram
     FE-->>User: 一覧からカードを削除
 ```
 
-### UC5: 並び替え（クライアント側のみ）
+### UC5: 並び替え
 
-並び替え（追加順／期限順／優先度順への切り替え、同一列内の手動ドラッグ並び替え）はAPI通信を伴わない。
-`GET /cards`（UC2）で取得済みのカード一覧を、フロントエンドの状態として保持したまま並べ替えるのみで完結する。
-画面を再読み込みすると、並び替え条件は初期値（追加順）に戻る。
+「期限順」「優先度順」への切り替えはAPI通信を伴わず、`GET /cards`（UC2）で取得済みのカード一覧を
+フロントエンドの状態として保持したまま並べ替えるのみで完結する。画面を再読み込みすると、並び替え条件は初期値（追加順）に戻る。
+
+同一列内の手動ドラッグ並び替えは、以下のシーケンスでサーバーに保存する。
+
+```mermaid
+sequenceDiagram
+    actor User as 利用者
+    participant FE as React (S1)
+    participant API as CardController
+    participant SVC as CardService
+    participant REPO as CardRepository
+    participant DB as PostgreSQL DB
+
+    User->>FE: カードを同じ列内の別カードの上にドラッグ&ドロップ
+    FE->>FE: ドロップ先の直前にカードを挿入して画面を即時更新
+    FE->>API: PUT /cards/reorder { status, cardIds }
+    API->>SVC: reorderCards(status, cardIds)
+    SVC->>REPO: findAllById(cardIds)
+    REPO->>DB: SELECT
+    DB-->>REPO: カード一覧
+    REPO-->>SVC: List<Card>
+    SVC->>SVC: cardIdsの順に0始まりのpositionを採番
+    SVC->>REPO: saveAll(cards)
+    REPO->>DB: UPDATE（一括）
+    REPO-->>SVC: List<Card>
+    SVC-->>API: List<Card>
+    API-->>FE: 200 OK + カード一覧
+```
+
+`cardIds`に含まれるカードが指定した`status`と一致しない場合、またはIDが1件でも存在しない場合は400を返す。
 
 ### UC6: カード編集
 

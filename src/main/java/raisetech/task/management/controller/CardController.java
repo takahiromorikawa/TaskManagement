@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import raisetech.task.management.controller.dto.CardCreateRequest;
+import raisetech.task.management.controller.dto.CardReorderRequest;
 import raisetech.task.management.controller.dto.CardResponse;
 import raisetech.task.management.controller.dto.CardStatusUpdateRequest;
 import raisetech.task.management.controller.dto.CardUpdateRequest;
@@ -64,5 +65,13 @@ public class CardController {
                 .map(CardResponse::from)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/reorder")
+    public ResponseEntity<List<CardResponse>> reorderCards(@Valid @RequestBody CardReorderRequest request) {
+        return cardService.reorderCards(request.status(), request.cardIds())
+                .map(cards -> cards.stream().map(CardResponse::from).toList())
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.badRequest().build());
     }
 }

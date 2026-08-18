@@ -9,9 +9,10 @@ interface ColumnProps {
   onCardClick: (card: Card) => void;
   onCardDragStart: (event: DragEvent<HTMLElement>, card: Card) => void;
   onDropStatus: (cardId: number, status: Status) => void;
+  onDropOnCard: (draggedCardId: number, targetCard: Card) => void;
 }
 
-function Column({ status, cards, onCardClick, onCardDragStart, onDropStatus }: ColumnProps) {
+function Column({ status, cards, onCardClick, onCardDragStart, onDropStatus, onDropOnCard }: ColumnProps) {
   const [isDragOver, setIsDragOver] = useState(false);
 
   function handleDragOver(event: DragEvent<HTMLDivElement>) {
@@ -44,7 +45,13 @@ function Column({ status, cards, onCardClick, onCardDragStart, onDropStatus }: C
           <p className="empty-hint">カードはありません</p>
         ) : (
           cards.map((card) => (
-            <CardItem key={card.id} card={card} onClick={onCardClick} onDragStart={onCardDragStart} />
+            <CardItem
+              key={card.id}
+              card={card}
+              onClick={onCardClick}
+              onDragStart={onCardDragStart}
+              onDropOnCard={onDropOnCard}
+            />
           ))
         )}
       </div>

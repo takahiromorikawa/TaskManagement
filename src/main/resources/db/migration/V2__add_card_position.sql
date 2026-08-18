@@ -1,0 +1,3 @@
+ALTER TABLE card ADD COLUMN position BIGINT NOT NULL DEFAULT 0;
+
+UPDATE card SET position = id;

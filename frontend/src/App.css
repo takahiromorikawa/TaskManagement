@@ -217,6 +217,11 @@
   border-radius: 8px;
 }
 
+.card.card-drag-over {
+  outline: 2px solid var(--priority-mid);
+  outline-offset: -2px;
+}
+
 .card-title {
   margin: 0;
   font-size: 0.92rem;
