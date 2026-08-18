@@ -1,7 +1,8 @@
 import { useEffect, useState, type DragEvent } from "react";
-import { createCard, getCards, reorderCards, updateCard, updateCardStatus } from "./api/cardApi";
+import { createCard, deleteCard, getCards, reorderCards, updateCard, updateCardStatus } from "./api/cardApi";
 import Board from "./components/Board";
 import CardFormModal from "./components/CardFormModal";
+import DeleteConfirmDialog from "./components/DeleteConfirmDialog";
 import type { Card, CardCreateInput, Status } from "./types/card";
 import "./App.css";
 
@@ -11,6 +12,7 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingCard, setEditingCard] = useState<Card | null>(null);
+  const [deletingCard, setDeletingCard] = useState<Card | null>(null);
 
   useEffect(() => {
     getCards()
@@ -85,6 +87,13 @@ function App() {
     await handleDropStatus(draggedCardId, targetCard.status);
   }
 
+  async function handleConfirmDelete() {
+    if (!deletingCard) return;
+    await deleteCard(deletingCard.id);
+    setCards((prev) => prev.filter((card) => card.id !== deletingCard.id));
+    setDeletingCard(null);
+  }
+
   return (
     <div className="app">
       <header className="topbar">
@@ -102,6 +111,7 @@ function App() {
           onCardDragStart={handleCardDragStart}
           onDropStatus={handleDropStatus}
           onDropOnCard={handleDropOnCard}
+          onDeleteClick={setDeletingCard}
         />
       )}
       {isCreateOpen && (
@@ -125,6 +135,13 @@ function App() {
           }}
           onSubmit={handleUpdateCard}
           onCancel={() => setEditingCard(null)}
+        />
+      )}
+      {deletingCard && (
+        <DeleteConfirmDialog
+          card={deletingCard}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setDeletingCard(null)}
         />
       )}
     </div>

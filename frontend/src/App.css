@@ -45,6 +45,11 @@
   border-color: var(--border);
 }
 
+.btn-danger {
+  background: var(--danger);
+  color: var(--surface);
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -63,6 +68,15 @@
   width: 100%;
   max-width: 420px;
   box-shadow: 0 8px 24px rgba(27, 34, 51, 0.2);
+}
+
+.modal-small {
+  max-width: 340px;
+}
+
+.modal-small p {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
 }
 
 .modal-header {
@@ -234,6 +248,20 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 0.4rem;
+}
+
+.card-delete-btn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.1rem 0.3rem;
+}
+
+.card-delete-btn:hover {
+  color: var(--danger);
 }
 
 .priority-pill {

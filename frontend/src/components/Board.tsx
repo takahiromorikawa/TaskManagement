@@ -10,9 +10,17 @@ interface BoardProps {
   onCardDragStart: (event: DragEvent<HTMLElement>, card: Card) => void;
   onDropStatus: (cardId: number, status: Status) => void;
   onDropOnCard: (draggedCardId: number, targetCard: Card) => void;
+  onDeleteClick: (card: Card) => void;
 }
 
-function Board({ cards, onCardClick, onCardDragStart, onDropStatus, onDropOnCard }: BoardProps) {
+function Board({
+  cards,
+  onCardClick,
+  onCardDragStart,
+  onDropStatus,
+  onDropOnCard,
+  onDeleteClick,
+}: BoardProps) {
   return (
     <main className="board">
       {STATUSES.map((status) => (
@@ -24,6 +32,7 @@ function Board({ cards, onCardClick, onCardDragStart, onDropStatus, onDropOnCard
           onCardDragStart={onCardDragStart}
           onDropStatus={onDropStatus}
           onDropOnCard={onDropOnCard}
+          onDeleteClick={onDeleteClick}
         />
       ))}
     </main>
