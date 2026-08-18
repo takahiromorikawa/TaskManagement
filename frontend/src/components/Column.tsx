@@ -10,9 +10,18 @@ interface ColumnProps {
   onCardDragStart: (event: DragEvent<HTMLElement>, card: Card) => void;
   onDropStatus: (cardId: number, status: Status) => void;
   onDropOnCard: (draggedCardId: number, targetCard: Card) => void;
+  onDeleteClick: (card: Card) => void;
 }
 
-function Column({ status, cards, onCardClick, onCardDragStart, onDropStatus, onDropOnCard }: ColumnProps) {
+function Column({
+  status,
+  cards,
+  onCardClick,
+  onCardDragStart,
+  onDropStatus,
+  onDropOnCard,
+  onDeleteClick,
+}: ColumnProps) {
   const [isDragOver, setIsDragOver] = useState(false);
 
   function handleDragOver(event: DragEvent<HTMLDivElement>) {
@@ -51,6 +60,7 @@ function Column({ status, cards, onCardClick, onCardDragStart, onDropStatus, onD
               onClick={onCardClick}
               onDragStart={onCardDragStart}
               onDropOnCard={onDropOnCard}
+              onDeleteClick={onDeleteClick}
             />
           ))
         )}

@@ -46,6 +46,15 @@ export async function updateCardStatus(id: number, status: Status): Promise<Card
   return response.json();
 }
 
+export async function deleteCard(id: number): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/cards/${id}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    throw new Error(`カードの削除に失敗しました (status: ${response.status})`);
+  }
+}
+
 export async function reorderCards(status: Status, cardIds: number[]): Promise<Card[]> {
   const response = await fetch(`${API_BASE_URL}/cards/reorder`, {
     method: "PUT",
