@@ -11,6 +11,7 @@
 - DBマイグレーション：Flyway（PostgreSQLのスキーマをコードでバージョン管理する。Spring Bootと親和性が高い標準的な組み合わせ）
 - テスト：JUnit 5（Spring Boot標準）
 - ボイラープレート削減：Lombok
+- 静的解析：Checkstyle（未使用import・空ブロックなど実装上の不具合につながりやすい項目を検出。`./gradlew check`に組み込み）
 
 ## データベース
 
