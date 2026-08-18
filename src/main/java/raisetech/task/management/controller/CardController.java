@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import raisetech.task.management.controller.dto.CardCreateRequest;
 import raisetech.task.management.controller.dto.CardResponse;
+import raisetech.task.management.controller.dto.CardStatusUpdateRequest;
 import raisetech.task.management.controller.dto.CardUpdateRequest;
 import raisetech.task.management.entity.Card;
 import raisetech.task.management.service.CardService;
@@ -52,6 +53,14 @@ public class CardController {
     @PutMapping("/{id}")
     public ResponseEntity<CardResponse> updateCard(@PathVariable Long id, @Valid @RequestBody CardUpdateRequest request) {
         return cardService.updateCard(id, request.title(), request.priority(), request.dueDate())
+                .map(CardResponse::from)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<CardResponse> updateStatus(@PathVariable Long id, @Valid @RequestBody CardStatusUpdateRequest request) {
+        return cardService.updateStatus(id, request.status())
                 .map(CardResponse::from)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());

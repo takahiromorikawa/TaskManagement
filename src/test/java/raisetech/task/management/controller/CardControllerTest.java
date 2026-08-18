@@ -146,4 +146,50 @@ class CardControllerTest {
 
         verify(cardService, org.mockito.Mockito.never()).updateCard(any(), any(), any(), any());
     }
+
+    @Test
+    void ステータス変更に成功すると200と更新後のカード情報を返す() {
+        Card card = new Card();
+        card.setId(1L);
+        card.setTitle("設計書を書く");
+        card.setStatus(Status.DOING);
+        card.setPriority(Priority.HIGH);
+        card.setDueDate(LocalDate.of(2026, 8, 20));
+
+        when(cardService.updateStatus(eq(1L), eq(Status.DOING))).thenReturn(Optional.of(card));
+
+        mockMvcTester.put().uri("/cards/1/status")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"status":"DOING"}
+                        """)
+                .assertThat()
+                .hasStatus(200)
+                .bodyJson()
+                .extractingPath("$.status").isEqualTo("DOING");
+    }
+
+    @Test
+    void 存在しないIDのステータスを変更しようとすると404を返す() {
+        when(cardService.updateStatus(eq(99L), any())).thenReturn(Optional.empty());
+
+        mockMvcTester.put().uri("/cards/99/status")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"status":"DONE"}
+                        """)
+                .assertThat()
+                .hasStatus(404);
+    }
+
+    @Test
+    void ステータス未指定の場合は400を返しサービスを呼び出さない() {
+        mockMvcTester.put().uri("/cards/1/status")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}")
+                .assertThat()
+                .hasStatus(400);
+
+        verify(cardService, org.mockito.Mockito.never()).updateStatus(any(), any());
+    }
 }

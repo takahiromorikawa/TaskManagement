@@ -44,4 +44,12 @@ public class CardService {
                     return cardRepository.save(card);
                 });
     }
+
+    public Optional<Card> updateStatus(Long id, Status status) {
+        return cardRepository.findById(id)
+                .map(card -> {
+                    card.setStatus(status);
+                    return cardRepository.save(card);
+                });
+    }
 }
