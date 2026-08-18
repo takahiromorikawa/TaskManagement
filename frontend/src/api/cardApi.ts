@@ -1,4 +1,4 @@
-import type { Card, CardCreateInput } from "../types/card";
+import type { Card, CardCreateInput, Status } from "../types/card";
 
 const API_BASE_URL = "http://localhost:8080";
 
@@ -18,6 +18,30 @@ export async function createCard(input: CardCreateInput): Promise<Card> {
   });
   if (!response.ok) {
     throw new Error(`カードの作成に失敗しました (status: ${response.status})`);
+  }
+  return response.json();
+}
+
+export async function updateCard(id: number, input: CardCreateInput): Promise<Card> {
+  const response = await fetch(`${API_BASE_URL}/cards/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (!response.ok) {
+    throw new Error(`カードの更新に失敗しました (status: ${response.status})`);
+  }
+  return response.json();
+}
+
+export async function updateCardStatus(id: number, status: Status): Promise<Card> {
+  const response = await fetch(`${API_BASE_URL}/cards/${id}/status`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status }),
+  });
+  if (!response.ok) {
+    throw new Error(`ステータスの変更に失敗しました (status: ${response.status})`);
   }
   return response.json();
 }

@@ -3,16 +3,27 @@ import type { CardCreateInput, Priority } from "../types/card";
 import { PRIORITY_LABEL } from "../utils/labels";
 
 interface CardFormModalProps {
-  onCreate: (input: CardCreateInput) => Promise<void>;
+  heading: string;
+  submitLabel: string;
+  submittingLabel: string;
+  initialValues?: CardCreateInput;
+  onSubmit: (input: CardCreateInput) => Promise<void>;
   onCancel: () => void;
 }
 
 const PRIORITIES: Priority[] = ["HIGH", "MID", "LOW"];
 
-function CardFormModal({ onCreate, onCancel }: CardFormModalProps) {
-  const [title, setTitle] = useState("");
-  const [priority, setPriority] = useState<Priority>("MID");
-  const [dueDate, setDueDate] = useState("");
+function CardFormModal({
+  heading,
+  submitLabel,
+  submittingLabel,
+  initialValues,
+  onSubmit,
+  onCancel,
+}: CardFormModalProps) {
+  const [title, setTitle] = useState(initialValues?.title ?? "");
+  const [priority, setPriority] = useState<Priority>(initialValues?.priority ?? "MID");
+  const [dueDate, setDueDate] = useState(initialValues?.dueDate ?? "");
   const [titleError, setTitleError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -29,13 +40,13 @@ function CardFormModal({ onCreate, onCancel }: CardFormModalProps) {
     setSubmitting(true);
 
     try {
-      await onCreate({
+      await onSubmit({
         title: title.trim(),
         priority,
         dueDate: dueDate || null,
       });
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "カードの作成に失敗しました");
+      setSubmitError(err instanceof Error ? err.message : "処理に失敗しました");
       setSubmitting(false);
     }
   }
@@ -44,7 +55,7 @@ function CardFormModal({ onCreate, onCancel }: CardFormModalProps) {
     <div className="modal-overlay">
       <div className="modal" role="dialog" aria-modal="true" aria-labelledby="card-form-title">
         <div className="modal-header">
-          <h2 id="card-form-title">新規カード作成</h2>
+          <h2 id="card-form-title">{heading}</h2>
           <button type="button" className="modal-close" onClick={onCancel} aria-label="閉じる">
             ×
           </button>
@@ -92,7 +103,7 @@ function CardFormModal({ onCreate, onCancel }: CardFormModalProps) {
               キャンセル
             </button>
             <button type="submit" className="btn btn-primary" disabled={submitting}>
-              {submitting ? "作成中..." : "作成"}
+              {submitting ? submittingLabel : submitLabel}
             </button>
           </div>
         </form>
