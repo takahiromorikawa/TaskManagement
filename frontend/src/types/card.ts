@@ -8,3 +8,9 @@ export interface Card {
   priority: Priority;
   dueDate: string | null;
 }
+
+export interface CardCreateInput {
+  title: string;
+  priority: Priority;
+  dueDate: string | null;
+}
