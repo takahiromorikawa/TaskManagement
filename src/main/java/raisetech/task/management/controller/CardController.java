@@ -47,14 +47,14 @@ public class CardController {
 
     @PostMapping
     public ResponseEntity<CardResponse> createCard(@Valid @RequestBody CardCreateRequest request) {
-        Card card = cardService.createCard(request.title(), request.priority(), request.dueDate());
+        Card card = cardService.createCard(request);
         CardResponse response = CardResponse.from(card);
         return ResponseEntity.created(URI.create("/cards/" + card.getId())).body(response);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<CardResponse> updateCard(@PathVariable Long id, @Valid @RequestBody CardUpdateRequest request) {
-        return cardService.updateCard(id, request.title(), request.priority(), request.dueDate())
+        return cardService.updateCard(id, request)
                 .map(CardResponse::from)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());

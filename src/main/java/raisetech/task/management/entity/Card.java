@@ -34,4 +34,20 @@ public class Card {
     private LocalDate dueDate;
 
     private Long position;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Card card)) {
+            return false;
+        }
+        return id != null && id.equals(card.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

@@ -2,7 +2,6 @@ package raisetech.task.management.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,6 +14,8 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
+import raisetech.task.management.controller.dto.CardCreateRequest;
+import raisetech.task.management.controller.dto.CardUpdateRequest;
 import raisetech.task.management.entity.Card;
 import raisetech.task.management.entity.Priority;
 import raisetech.task.management.entity.Status;
@@ -38,7 +39,7 @@ class CardControllerTest {
         card.setPriority(Priority.HIGH);
         card.setDueDate(LocalDate.of(2026, 8, 20));
 
-        when(cardService.createCard(eq("設計書を書く"), eq(Priority.HIGH), eq(LocalDate.of(2026, 8, 20))))
+        when(cardService.createCard(eq(new CardCreateRequest("設計書を書く", Priority.HIGH, LocalDate.of(2026, 8, 20)))))
                 .thenReturn(card);
 
         mockMvcTester.post().uri("/cards")
@@ -61,7 +62,7 @@ class CardControllerTest {
         card.setStatus(Status.TODO);
         card.setPriority(Priority.MID);
 
-        when(cardService.createCard(eq("最小構成のカード"), isNull(), isNull()))
+        when(cardService.createCard(eq(new CardCreateRequest("最小構成のカード", null, null))))
                 .thenReturn(card);
 
         mockMvcTester.post().uri("/cards")
@@ -83,7 +84,7 @@ class CardControllerTest {
                 .assertThat()
                 .hasStatus(400);
 
-        verify(cardService, org.mockito.Mockito.never()).createCard(any(), any(), any());
+        verify(cardService, org.mockito.Mockito.never()).createCard(any());
     }
 
     @Test
@@ -95,7 +96,7 @@ class CardControllerTest {
         card.setPriority(Priority.LOW);
         card.setDueDate(LocalDate.of(2026, 9, 1));
 
-        when(cardService.updateCard(eq(1L), eq("設計書を書き直す"), eq(Priority.LOW), eq(LocalDate.of(2026, 9, 1))))
+        when(cardService.updateCard(eq(1L), eq(new CardUpdateRequest("設計書を書き直す", Priority.LOW, LocalDate.of(2026, 9, 1)))))
                 .thenReturn(Optional.of(card));
 
         mockMvcTester.put().uri("/cards/1")
@@ -111,7 +112,7 @@ class CardControllerTest {
 
     @Test
     void 存在しないIDを更新しようとすると404を返す() {
-        when(cardService.updateCard(eq(99L), any(), any(), any())).thenReturn(Optional.empty());
+        when(cardService.updateCard(eq(99L), any())).thenReturn(Optional.empty());
 
         mockMvcTester.put().uri("/cards/99")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -132,7 +133,7 @@ class CardControllerTest {
                 .assertThat()
                 .hasStatus(400);
 
-        verify(cardService, org.mockito.Mockito.never()).updateCard(any(), any(), any(), any());
+        verify(cardService, org.mockito.Mockito.never()).updateCard(any(), any());
     }
 
     @Test
@@ -145,7 +146,7 @@ class CardControllerTest {
                 .assertThat()
                 .hasStatus(400);
 
-        verify(cardService, org.mockito.Mockito.never()).updateCard(any(), any(), any(), any());
+        verify(cardService, org.mockito.Mockito.never()).updateCard(any(), any());
     }
 
     @Test
