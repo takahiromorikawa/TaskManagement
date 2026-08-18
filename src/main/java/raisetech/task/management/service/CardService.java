@@ -1,9 +1,12 @@
 package raisetech.task.management.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import raisetech.task.management.entity.Card;
+import raisetech.task.management.entity.Priority;
+import raisetech.task.management.entity.Status;
 import raisetech.task.management.repository.CardRepository;
 
 @Service
@@ -21,5 +24,14 @@ public class CardService {
 
     public Optional<Card> getCardById(Long id) {
         return cardRepository.findById(id);
+    }
+
+    public Card createCard(String title, Priority priority, LocalDate dueDate) {
+        Card card = new Card();
+        card.setTitle(title);
+        card.setStatus(Status.TODO);
+        card.setPriority(priority != null ? priority : Priority.MID);
+        card.setDueDate(dueDate);
+        return cardRepository.save(card);
     }
 }
