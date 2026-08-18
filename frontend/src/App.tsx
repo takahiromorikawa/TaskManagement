@@ -3,8 +3,12 @@ import { createCard, deleteCard, getCards, reorderCards, updateCard, updateCardS
 import Board from "./components/Board";
 import CardFormModal from "./components/CardFormModal";
 import DeleteConfirmDialog from "./components/DeleteConfirmDialog";
-import type { Card, CardCreateInput, Status } from "./types/card";
+import type { Card, CardCreateInput, SortOrder, Status } from "./types/card";
+import { SORT_ORDER_LABEL } from "./utils/labels";
+import { sortCards } from "./utils/sort";
 import "./App.css";
+
+const SORT_ORDERS: SortOrder[] = ["ADDED", "DUE_DATE", "PRIORITY"];
 
 function App() {
   const [cards, setCards] = useState<Card[]>([]);
@@ -13,6 +17,7 @@ function App() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingCard, setEditingCard] = useState<Card | null>(null);
   const [deletingCard, setDeletingCard] = useState<Card | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("ADDED");
 
   useEffect(() => {
     getCards()
@@ -81,6 +86,7 @@ function App() {
     if (reordered === cardsWithStatus && !statusChanged) return;
 
     setCards(reordered);
+    setSortOrder("ADDED");
 
     try {
       if (statusChanged) {
@@ -103,19 +109,38 @@ function App() {
     setDeletingCard(null);
   }
 
+  const displayCards = sortCards(cards, sortOrder);
+
   return (
     <div className="app">
       <header className="topbar">
         <h1>タスク管理</h1>
-        <button type="button" className="btn btn-primary" onClick={() => setIsCreateOpen(true)}>
-          + 新規作成
-        </button>
+        <div className="topbar-actions">
+          <label className="sort-label" htmlFor="sort-order">
+            並び替え:
+          </label>
+          <select
+            id="sort-order"
+            className="sort-select"
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value as SortOrder)}
+          >
+            {SORT_ORDERS.map((order) => (
+              <option key={order} value={order}>
+                {SORT_ORDER_LABEL[order]}
+              </option>
+            ))}
+          </select>
+          <button type="button" className="btn btn-primary" onClick={() => setIsCreateOpen(true)}>
+            + 新規作成
+          </button>
+        </div>
       </header>
       {loading && <p className="board-status">読み込み中...</p>}
       {!loading && error && <p className="board-status board-error">{error}</p>}
       {!loading && !error && (
         <Board
-          cards={cards}
+          cards={displayCards}
           onCardClick={setEditingCard}
           onCardDragStart={handleCardDragStart}
           onDropStatus={handleDropStatus}

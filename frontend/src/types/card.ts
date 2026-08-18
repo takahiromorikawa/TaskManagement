@@ -1,5 +1,6 @@
 export type Status = "TODO" | "DOING" | "DONE";
 export type Priority = "HIGH" | "MID" | "LOW";
+export type SortOrder = "ADDED" | "DUE_DATE" | "PRIORITY";
 
 export interface Card {
   id: number;
