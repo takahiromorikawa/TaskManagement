@@ -9,7 +9,7 @@ interface BoardProps {
   onCardClick: (card: Card) => void;
   onCardDragStart: (event: DragEvent<HTMLElement>, card: Card) => void;
   onDropStatus: (cardId: number, status: Status) => void;
-  onDropOnCard: (draggedCardId: number, targetCard: Card) => void;
+  onDropOnCard: (draggedCardId: number, targetCard: Card, position: "before" | "after") => void;
   onDeleteClick: (card: Card) => void;
 }
 
