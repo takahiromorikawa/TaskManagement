@@ -56,41 +56,50 @@ function App() {
     }
   }
 
-  function computeReorderedCards(prev: Card[], draggedCardId: number, targetCardId: number): Card[] {
+  function computeReorderedCards(
+    prev: Card[],
+    draggedCardId: number,
+    targetCardId: number,
+    position: "before" | "after",
+  ): Card[] {
     const fromIndex = prev.findIndex((card) => card.id === draggedCardId);
     if (fromIndex === -1) return prev;
 
     const next = [...prev];
     const [dragged] = next.splice(fromIndex, 1);
-    const toIndex = next.findIndex((card) => card.id === targetCardId);
-    if (toIndex === -1) return prev;
-    next.splice(toIndex, 0, dragged);
+    const targetIndex = next.findIndex((card) => card.id === targetCardId);
+    if (targetIndex === -1) return prev;
+    const insertIndex = position === "after" ? targetIndex + 1 : targetIndex;
+    next.splice(insertIndex, 0, dragged);
     return next;
   }
 
-  async function handleDropOnCard(draggedCardId: number, targetCard: Card) {
+  async function handleDropOnCard(draggedCardId: number, targetCard: Card, position: "before" | "after") {
     const dragged = cards.find((card) => card.id === draggedCardId);
     if (!dragged || dragged.id === targetCard.id) return;
 
-    if (dragged.status === targetCard.status) {
-      const reordered = computeReorderedCards(cards, draggedCardId, targetCard.id);
-      if (reordered === cards) return;
-      setCards(reordered);
-      setSortOrder("ADDED");
+    const statusChanged = dragged.status !== targetCard.status;
+    const cardsWithStatus = statusChanged
+      ? cards.map((card) => (card.id === draggedCardId ? { ...card, status: targetCard.status } : card))
+      : cards;
+    const reordered = computeReorderedCards(cardsWithStatus, draggedCardId, targetCard.id, position);
+    if (reordered === cardsWithStatus && !statusChanged) return;
 
-      const cardIdsInStatus = reordered
-        .filter((card) => card.status === dragged.status)
-        .map((card) => card.id);
-      try {
-        await reorderCards(dragged.status, cardIdsInStatus);
-      } catch (err) {
-        alert(err instanceof Error ? err.message : "並び替えの保存に失敗しました");
-        getCards().then(setCards).catch(() => {});
+    setCards(reordered);
+    setSortOrder("ADDED");
+
+    try {
+      if (statusChanged) {
+        await updateCardStatus(draggedCardId, targetCard.status);
       }
-      return;
+      const cardIdsInStatus = reordered
+        .filter((card) => card.status === targetCard.status)
+        .map((card) => card.id);
+      await reorderCards(targetCard.status, cardIdsInStatus);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "並び替えの保存に失敗しました");
+      getCards().then(setCards).catch(() => {});
     }
-
-    await handleDropStatus(draggedCardId, targetCard.status);
   }
 
   async function handleConfirmDelete() {
@@ -105,7 +114,7 @@ function App() {
   return (
     <div className="app">
       <header className="topbar">
-        <h1>TaskManagement</h1>
+        <h1>タスク管理</h1>
         <div className="topbar-actions">
           <label className="sort-label" htmlFor="sort-order">
             並び替え:
