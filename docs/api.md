@@ -19,6 +19,9 @@
 「期限順」「優先度順」への切り替えはフロントエンド側で `GET /cards` の結果を並べ替えるのみで実現し、
 API通信・永続化は行わない。同一列内の手動ドラッグ並び替えは `PUT /cards/reorder` でサーバーに保存する。
 
+バリデーションエラー・不正なリクエストボディの場合は、`GlobalExceptionHandler`により
+`{"message": "..."}` 形式のレスポンスボディで統一して400を返す。
+
 ## シーケンス図
 
 各ユースケースにおける、画面（React）とバックエンド（Controller / Service / Repository / DB）間のやり取りを示す。
@@ -37,7 +40,7 @@ sequenceDiagram
 
     User->>FE: タイトル・優先度・期限を入力して「作成」
     FE->>API: POST /cards { title, priority, dueDate }
-    API->>SVC: createCard(title, priority, dueDate)
+    API->>SVC: createCard(request)
     SVC->>REPO: save(Card)
     REPO->>DB: INSERT
     DB-->>REPO: 採番されたid
@@ -81,23 +84,32 @@ sequenceDiagram
     participant REPO as CardRepository
     participant DB as PostgreSQL DB
 
-    User->>FE: カードを別の列にドラッグ&ドロップ
+    User->>FE: カードを別の列の空き領域にドラッグ&ドロップ
     FE->>API: PUT /cards/{id}/status { status }
     API->>SVC: updateStatus(id, status)
     SVC->>REPO: findById(id)
     REPO->>DB: SELECT
     DB-->>REPO: Card
     REPO-->>SVC: Card
+    alt ステータスが変わる場合
+        SVC->>REPO: findMaxPositionByStatus(status)
+        REPO->>DB: SELECT MAX(position)
+        DB-->>REPO: 移動先列の最大position
+        REPO-->>SVC: 最大position
+        SVC->>SVC: 移動先列の末尾になるようpositionを採番し直す
+    end
     SVC->>SVC: statusをリクエスト値で上書き
     SVC->>REPO: save(Card)
     REPO->>DB: UPDATE
     REPO-->>SVC: Card
     SVC-->>API: Card
     API-->>FE: 200 OK + Card
-    FE-->>User: 該当する列へ移動して表示
+    FE-->>User: 該当する列の末尾へ移動して表示
 ```
 
 移動先が前の列（例: 完了→進行中）であっても同じAPIで対応する。ステータスの前後関係による制約はない。
+別の列の特定のカードの上にドロップした場合は、このAPIに続けてUC5（並び替え）の`PUT /cards/reorder`が呼ばれ、
+挿入位置（直前/直後）が反映される。
 
 ### UC4: カード削除
 
@@ -127,7 +139,8 @@ sequenceDiagram
 「期限順」「優先度順」への切り替えはAPI通信を伴わず、`GET /cards`（UC2）で取得済みのカード一覧を
 フロントエンドの状態として保持したまま並べ替えるのみで完結する。画面を再読み込みすると、並び替え条件は初期値（追加順）に戻る。
 
-同一列内の手動ドラッグ並び替えは、以下のシーケンスでサーバーに保存する。
+別カードの上への手動ドラッグ並び替えは、以下のシーケンスでサーバーに保存する。
+別の列のカードにドロップした場合は、事前にUC3の`PUT /cards/{id}/status`でステータス変更が行われた上でこのAPIが呼ばれる。
 
 ```mermaid
 sequenceDiagram
@@ -138,8 +151,8 @@ sequenceDiagram
     participant REPO as CardRepository
     participant DB as PostgreSQL DB
 
-    User->>FE: カードを同じ列内の別カードの上にドラッグ&ドロップ
-    FE->>FE: ドロップ先の直前にカードを挿入して画面を即時更新
+    User->>FE: カードを別カードの上（同じ列／別の列）にドラッグ&ドロップ
+    FE->>FE: ドロップ先の上半分なら直前・下半分なら直後にカードを挿入して画面を即時更新
     FE->>API: PUT /cards/reorder { status, cardIds }
     API->>SVC: reorderCards(status, cardIds)
     SVC->>REPO: findAllById(cardIds)
@@ -161,16 +174,16 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor User as 利用者
-    participant FE as React (S1/編集ポップアップ)
+    participant FE as React (S1/S4)
     participant API as CardController
     participant SVC as CardService
     participant REPO as CardRepository
     participant DB as PostgreSQL DB
 
-    User->>FE: カードをクリックして編集ポップアップを開く
+    User->>FE: カードをクリックしてS4（カード編集フォーム）を開く
     User->>FE: タイトル・優先度・期限を変更して「保存」
     FE->>API: PUT /cards/{id} { title, priority, dueDate }
-    API->>SVC: updateCard(id, title, priority, dueDate)
+    API->>SVC: updateCard(id, request)
     SVC->>REPO: findById(id)
     REPO->>DB: SELECT
     DB-->>REPO: Card
