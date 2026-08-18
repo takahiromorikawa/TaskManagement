@@ -20,6 +20,27 @@
   font-size: 1.4rem;
 }
 
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.sort-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.sort-select {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+}
+
 .btn {
   font-size: 0.85rem;
   font-weight: 600;
