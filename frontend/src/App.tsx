@@ -49,6 +49,32 @@ function App() {
     }
   }
 
+  function reorderWithinColumn(draggedCardId: number, targetCardId: number) {
+    setCards((prev) => {
+      const fromIndex = prev.findIndex((card) => card.id === draggedCardId);
+      if (fromIndex === -1) return prev;
+
+      const next = [...prev];
+      const [dragged] = next.splice(fromIndex, 1);
+      const toIndex = next.findIndex((card) => card.id === targetCardId);
+      if (toIndex === -1) return prev;
+      next.splice(toIndex, 0, dragged);
+      return next;
+    });
+  }
+
+  async function handleDropOnCard(draggedCardId: number, targetCard: Card) {
+    const dragged = cards.find((card) => card.id === draggedCardId);
+    if (!dragged || dragged.id === targetCard.id) return;
+
+    if (dragged.status === targetCard.status) {
+      reorderWithinColumn(draggedCardId, targetCard.id);
+      return;
+    }
+
+    await handleDropStatus(draggedCardId, targetCard.status);
+  }
+
   return (
     <div className="app">
       <header className="topbar">
@@ -65,6 +91,7 @@ function App() {
           onCardClick={setEditingCard}
           onCardDragStart={handleCardDragStart}
           onDropStatus={handleDropStatus}
+          onDropOnCard={handleDropOnCard}
         />
       )}
       {isCreateOpen && (
