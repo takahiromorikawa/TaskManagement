@@ -1,15 +1,23 @@
+import type { DragEvent } from "react";
 import type { Card } from "../types/card";
 import { PRIORITY_LABEL, formatDueDate, isOverdue } from "../utils/labels";
 
 interface CardItemProps {
   card: Card;
+  onClick: (card: Card) => void;
+  onDragStart: (event: DragEvent<HTMLElement>, card: Card) => void;
 }
 
-function CardItem({ card }: CardItemProps) {
+function CardItem({ card, onClick, onDragStart }: CardItemProps) {
   const overdue = card.dueDate ? isOverdue(card.dueDate, card.status) : false;
 
   return (
-    <article className="card">
+    <article
+      className="card"
+      draggable
+      onDragStart={(e) => onDragStart(e, card)}
+      onClick={() => onClick(card)}
+    >
       <p className="card-title">{card.title}</p>
       <div className="card-meta">
         <span className={`priority-pill priority-${card.priority.toLowerCase()}`}>
