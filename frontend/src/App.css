@@ -1,0 +1,142 @@
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  padding: 1.1rem 1.5rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.board-status {
+  padding: 2rem 1.5rem;
+  color: var(--text-muted);
+}
+
+.board-error {
+  color: var(--danger);
+}
+
+.board {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  padding: 1.5rem;
+}
+
+.column {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.column-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.15rem 0.25rem;
+}
+
+.column-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.column-count {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.05rem 0.5rem;
+}
+
+.column-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  min-height: 70px;
+}
+
+.empty-hint {
+  margin: 0.4rem 0.25rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.7rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-shadow: 0 1px 2px rgba(27, 34, 51, 0.08);
+}
+
+.card-title {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 500;
+  text-align: left;
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.priority-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+}
+
+.priority-high {
+  color: var(--priority-high);
+  background: var(--priority-high-soft);
+}
+
+.priority-mid {
+  color: var(--priority-mid);
+  background: var(--priority-mid-soft);
+}
+
+.priority-low {
+  color: var(--priority-low);
+  background: var(--priority-low-soft);
+}
+
+.due-date {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.due-date.overdue {
+  color: var(--danger);
+  font-weight: 600;
+}
