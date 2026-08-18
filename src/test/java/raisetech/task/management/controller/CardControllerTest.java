@@ -247,4 +247,22 @@ class CardControllerTest {
 
         verify(cardService, org.mockito.Mockito.never()).reorderCards(any(), any());
     }
+
+    @Test
+    void カード削除に成功すると204を返す() {
+        when(cardService.deleteCard(1L)).thenReturn(true);
+
+        mockMvcTester.delete().uri("/cards/1")
+                .assertThat()
+                .hasStatus(204);
+    }
+
+    @Test
+    void 存在しないIDを削除しようとすると404を返す() {
+        when(cardService.deleteCard(99L)).thenReturn(false);
+
+        mockMvcTester.delete().uri("/cards/99")
+                .assertThat()
+                .hasStatus(404);
+    }
 }

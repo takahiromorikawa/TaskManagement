@@ -75,4 +75,12 @@ public class CardService {
         }
         return Optional.of(cardRepository.saveAll(reordered));
     }
+
+    public boolean deleteCard(Long id) {
+        if (!cardRepository.existsById(id)) {
+            return false;
+        }
+        cardRepository.deleteById(id);
+        return true;
+    }
 }
