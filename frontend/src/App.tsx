@@ -1,8 +1,9 @@
-import { useEffect, useState, type DragEvent } from "react";
+import { useEffect, useMemo, useState, type DragEvent } from "react";
 import { createCard, deleteCard, getCards, reorderCards, updateCard, updateCardStatus } from "./api/cardApi";
 import Board from "./components/Board";
 import CardFormModal from "./components/CardFormModal";
 import DeleteConfirmDialog from "./components/DeleteConfirmDialog";
+import { BoardActionsProvider } from "./context/BoardActionsProvider";
 import type { Card, CardCreateInput, SortOrder, Status } from "./types/card";
 import { SORT_ORDER_LABEL } from "./utils/labels";
 import { sortCards } from "./utils/sort";
@@ -18,6 +19,7 @@ function App() {
   const [editingCard, setEditingCard] = useState<Card | null>(null);
   const [deletingCard, setDeletingCard] = useState<Card | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("ADDED");
+  const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {
     getCards()
@@ -39,9 +41,12 @@ function App() {
     setEditingCard(null);
   }
 
-  function handleCardDragStart(event: DragEvent<HTMLElement>, card: Card) {
-    event.dataTransfer.setData("text/plain", String(card.id));
-    event.dataTransfer.effectAllowed = "move";
+  function resyncCardsAfterFailure() {
+    getCards()
+      .then(setCards)
+      .catch((resyncErr: Error) => {
+        console.error("カード一覧の再取得に失敗しました", resyncErr);
+      });
   }
 
   async function handleDropStatus(cardId: number, status: Status) {
@@ -52,7 +57,7 @@ function App() {
       const updated = await updateCardStatus(cardId, status);
       setCards((prev) => prev.map((card) => (card.id === updated.id ? updated : card)));
     } catch (err) {
-      alert(err instanceof Error ? err.message : "ステータスの変更に失敗しました");
+      setActionError(err instanceof Error ? err.message : "ステータスの変更に失敗しました");
     }
   }
 
@@ -97,8 +102,8 @@ function App() {
         .map((card) => card.id);
       await reorderCards(targetCard.status, cardIdsInStatus);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "並び替えの保存に失敗しました");
-      getCards().then(setCards).catch(() => {});
+      setActionError(err instanceof Error ? err.message : "並び替えの保存に失敗しました");
+      resyncCardsAfterFailure();
     }
   }
 
@@ -109,7 +114,20 @@ function App() {
     setDeletingCard(null);
   }
 
-  const displayCards = sortCards(cards, sortOrder);
+  function handleCardDragStart(event: DragEvent<HTMLElement>, card: Card) {
+    event.dataTransfer.setData("text/plain", String(card.id));
+    event.dataTransfer.effectAllowed = "move";
+  }
+
+  const displayCards = useMemo(() => sortCards(cards, sortOrder), [cards, sortOrder]);
+
+  const boardActions = {
+    onCardClick: setEditingCard,
+    onCardDragStart: handleCardDragStart,
+    onDropStatus: handleDropStatus,
+    onDropOnCard: handleDropOnCard,
+    onDeleteClick: setDeletingCard,
+  };
 
   return (
     <div className="app">
@@ -139,14 +157,9 @@ function App() {
       {loading && <p className="board-status">読み込み中...</p>}
       {!loading && error && <p className="board-status board-error">{error}</p>}
       {!loading && !error && (
-        <Board
-          cards={displayCards}
-          onCardClick={setEditingCard}
-          onCardDragStart={handleCardDragStart}
-          onDropStatus={handleDropStatus}
-          onDropOnCard={handleDropOnCard}
-          onDeleteClick={setDeletingCard}
-        />
+        <BoardActionsProvider value={boardActions}>
+          <Board cards={displayCards} />
+        </BoardActionsProvider>
       )}
       {isCreateOpen && (
         <CardFormModal
@@ -177,6 +190,14 @@ function App() {
           onConfirm={handleConfirmDelete}
           onCancel={() => setDeletingCard(null)}
         />
+      )}
+      {actionError && (
+        <div className="toast toast-error" role="alert">
+          <span>{actionError}</span>
+          <button type="button" onClick={() => setActionError(null)} aria-label="閉じる">
+            ×
+          </button>
+        </div>
       )}
     </div>
   );
