@@ -73,24 +73,27 @@ function App() {
     const dragged = cards.find((card) => card.id === draggedCardId);
     if (!dragged || dragged.id === targetCard.id) return;
 
-    if (dragged.status === targetCard.status) {
-      const reordered = computeReorderedCards(cards, draggedCardId, targetCard.id, position);
-      if (reordered === cards) return;
-      setCards(reordered);
+    const statusChanged = dragged.status !== targetCard.status;
+    const cardsWithStatus = statusChanged
+      ? cards.map((card) => (card.id === draggedCardId ? { ...card, status: targetCard.status } : card))
+      : cards;
+    const reordered = computeReorderedCards(cardsWithStatus, draggedCardId, targetCard.id, position);
+    if (reordered === cardsWithStatus && !statusChanged) return;
 
-      const cardIdsInStatus = reordered
-        .filter((card) => card.status === dragged.status)
-        .map((card) => card.id);
-      try {
-        await reorderCards(dragged.status, cardIdsInStatus);
-      } catch (err) {
-        alert(err instanceof Error ? err.message : "並び替えの保存に失敗しました");
-        getCards().then(setCards).catch(() => {});
+    setCards(reordered);
+
+    try {
+      if (statusChanged) {
+        await updateCardStatus(draggedCardId, targetCard.status);
       }
-      return;
+      const cardIdsInStatus = reordered
+        .filter((card) => card.status === targetCard.status)
+        .map((card) => card.id);
+      await reorderCards(targetCard.status, cardIdsInStatus);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "並び替えの保存に失敗しました");
+      getCards().then(setCards).catch(() => {});
     }
-
-    await handleDropStatus(draggedCardId, targetCard.status);
   }
 
   async function handleConfirmDelete() {
