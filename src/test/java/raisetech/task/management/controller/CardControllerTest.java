@@ -86,6 +86,68 @@ class CardControllerTest {
     }
 
     @Test
+    void カード更新に成功すると200と更新後のカード情報を返す() {
+        Card card = new Card();
+        card.setId(1L);
+        card.setTitle("設計書を書き直す");
+        card.setStatus(Status.DOING);
+        card.setPriority(Priority.LOW);
+        card.setDueDate(LocalDate.of(2026, 9, 1));
+
+        when(cardService.updateCard(eq(1L), eq("設計書を書き直す"), eq(Priority.LOW), eq(LocalDate.of(2026, 9, 1))))
+                .thenReturn(Optional.of(card));
+
+        mockMvcTester.put().uri("/cards/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"title":"設計書を書き直す","priority":"LOW","dueDate":"2026-09-01"}
+                        """)
+                .assertThat()
+                .hasStatus(200)
+                .bodyJson()
+                .extractingPath("$.title").isEqualTo("設計書を書き直す");
+    }
+
+    @Test
+    void 存在しないIDを更新しようとすると404を返す() {
+        when(cardService.updateCard(eq(99L), any(), any(), any())).thenReturn(Optional.empty());
+
+        mockMvcTester.put().uri("/cards/99")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"title":"存在しないカード","priority":"MID"}
+                        """)
+                .assertThat()
+                .hasStatus(404);
+    }
+
+    @Test
+    void 更新時にタイトル未入力の場合は400を返しサービスを呼び出さない() {
+        mockMvcTester.put().uri("/cards/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"title":"","priority":"MID"}
+                        """)
+                .assertThat()
+                .hasStatus(400);
+
+        verify(cardService, org.mockito.Mockito.never()).updateCard(any(), any(), any(), any());
+    }
+
+    @Test
+    void 更新時に優先度未指定の場合は400を返す() {
+        mockMvcTester.put().uri("/cards/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"title":"タイトルのみ"}
+                        """)
+                .assertThat()
+                .hasStatus(400);
+
+        verify(cardService, org.mockito.Mockito.never()).updateCard(any(), any(), any(), any());
+    }
+
+    @Test
     void ステータス変更に成功すると200と更新後のカード情報を返す() {
         Card card = new Card();
         card.setId(1L);

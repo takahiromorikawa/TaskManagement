@@ -35,6 +35,16 @@ public class CardService {
         return cardRepository.save(card);
     }
 
+    public Optional<Card> updateCard(Long id, String title, Priority priority, LocalDate dueDate) {
+        return cardRepository.findById(id)
+                .map(card -> {
+                    card.setTitle(title);
+                    card.setPriority(priority);
+                    card.setDueDate(dueDate);
+                    return cardRepository.save(card);
+                });
+    }
+
     public Optional<Card> updateStatus(Long id, Status status) {
         return cardRepository.findById(id)
                 .map(card -> {

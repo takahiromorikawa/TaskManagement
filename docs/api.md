@@ -9,6 +9,7 @@
 | GET | /cards | カード一覧取得（id昇順＝作成順で返却） |
 | GET | /cards/{id} | カード詳細取得 |
 | POST | /cards | カード新規作成（title・priority・dueDateを指定） |
+| PUT | /cards/{id} | カード編集（title・priority・dueDateを更新。statusは変更しない） |
 | PUT | /cards/{id}/status | ステータス変更（リクエストボディで指定した任意のステータスに変更） |
 | DELETE | /cards/{id} | カード削除 |
 
@@ -125,3 +126,33 @@ sequenceDiagram
 並び替え（追加順／期限順／優先度順への切り替え、同一列内の手動ドラッグ並び替え）はAPI通信を伴わない。
 `GET /cards`（UC2）で取得済みのカード一覧を、フロントエンドの状態として保持したまま並べ替えるのみで完結する。
 画面を再読み込みすると、並び替え条件は初期値（追加順）に戻る。
+
+### UC6: カード編集
+
+```mermaid
+sequenceDiagram
+    actor User as 利用者
+    participant FE as React (S1/編集ポップアップ)
+    participant API as CardController
+    participant SVC as CardService
+    participant REPO as CardRepository
+    participant DB as PostgreSQL DB
+
+    User->>FE: カードをクリックして編集ポップアップを開く
+    User->>FE: タイトル・優先度・期限を変更して「保存」
+    FE->>API: PUT /cards/{id} { title, priority, dueDate }
+    API->>SVC: updateCard(id, title, priority, dueDate)
+    SVC->>REPO: findById(id)
+    REPO->>DB: SELECT
+    DB-->>REPO: Card
+    REPO-->>SVC: Card
+    SVC->>SVC: title・priority・dueDateを上書き（statusは変更しない）
+    SVC->>REPO: save(Card)
+    REPO->>DB: UPDATE
+    REPO-->>SVC: Card
+    SVC-->>API: Card
+    API-->>FE: 200 OK + Card
+    FE-->>User: ポップアップを閉じ、更新後の内容を表示
+```
+
+対象カードが存在しない場合は404を返す。
