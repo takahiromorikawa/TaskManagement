@@ -1,4 +1,5 @@
 import { useState, type SubmitEvent } from "react";
+import { useModalA11y } from "../hooks/useModalA11y";
 import type { CardCreateInput, Priority } from "../types/card";
 import { PRIORITY_LABEL } from "../utils/labels";
 
@@ -27,6 +28,7 @@ function CardFormModal({
   const [titleError, setTitleError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const containerRef = useModalA11y(onCancel);
 
   async function handleSubmit(event: SubmitEvent) {
     event.preventDefault();
@@ -53,7 +55,7 @@ function CardFormModal({
 
   return (
     <div className="modal-overlay">
-      <div className="modal" role="dialog" aria-modal="true" aria-labelledby="card-form-title">
+      <div className="modal" ref={containerRef} role="dialog" aria-modal="true" aria-labelledby="card-form-title">
         <div className="modal-header">
           <h2 id="card-form-title">{heading}</h2>
           <button type="button" className="modal-close" onClick={onCancel} aria-label="閉じる">

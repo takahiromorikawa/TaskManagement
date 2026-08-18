@@ -1,4 +1,5 @@
 import { useState, type DragEvent, type MouseEvent } from "react";
+import { useBoardActions } from "../hooks/useBoardActions";
 import type { Card } from "../types/card";
 import { PRIORITY_LABEL, formatDueDate, isOverdue } from "../utils/labels";
 
@@ -6,13 +7,10 @@ type DropPosition = "before" | "after";
 
 interface CardItemProps {
   card: Card;
-  onClick: (card: Card) => void;
-  onDragStart: (event: DragEvent<HTMLElement>, card: Card) => void;
-  onDropOnCard: (draggedCardId: number, targetCard: Card, position: DropPosition) => void;
-  onDeleteClick: (card: Card) => void;
 }
 
-function CardItem({ card, onClick, onDragStart, onDropOnCard, onDeleteClick }: CardItemProps) {
+function CardItem({ card }: CardItemProps) {
+  const { onCardClick, onCardDragStart, onDropOnCard, onDeleteClick } = useBoardActions();
   const [dropPosition, setDropPosition] = useState<DropPosition | null>(null);
   const overdue = card.dueDate ? isOverdue(card.dueDate, card.status) : false;
 
@@ -47,11 +45,11 @@ function CardItem({ card, onClick, onDragStart, onDropOnCard, onDeleteClick }: C
     <article
       className={`card${dropClass}`}
       draggable
-      onDragStart={(e) => onDragStart(e, card)}
+      onDragStart={(e) => onCardDragStart(e, card)}
       onDragOver={handleDragOver}
       onDragLeave={() => setDropPosition(null)}
       onDrop={handleDrop}
-      onClick={() => onClick(card)}
+      onClick={() => onCardClick(card)}
     >
       <p className="card-title">{card.title}</p>
       <div className="card-meta">

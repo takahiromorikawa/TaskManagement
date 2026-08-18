@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useModalA11y } from "../hooks/useModalA11y";
 import type { Card } from "../types/card";
 
 interface DeleteConfirmDialogProps {
@@ -10,6 +11,7 @@ interface DeleteConfirmDialogProps {
 function DeleteConfirmDialog({ card, onConfirm, onCancel }: DeleteConfirmDialogProps) {
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const containerRef = useModalA11y(onCancel);
 
   async function handleConfirm() {
     setError(null);
@@ -26,6 +28,7 @@ function DeleteConfirmDialog({ card, onConfirm, onCancel }: DeleteConfirmDialogP
     <div className="modal-overlay">
       <div
         className="modal modal-small"
+        ref={containerRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="delete-confirm-title"
@@ -36,7 +39,7 @@ function DeleteConfirmDialog({ card, onConfirm, onCancel }: DeleteConfirmDialogP
         <p>「{card.title}」を削除しますか？</p>
         {error && <p className="field-error">{error}</p>}
         <div className="modal-actions">
-          <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={deleting}>
+          <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={deleting} autoFocus>
             キャンセル
           </button>
           <button type="button" className="btn btn-danger" onClick={handleConfirm} disabled={deleting}>
