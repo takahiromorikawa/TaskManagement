@@ -8,14 +8,14 @@
 
 | 項目名 | 型 | 説明 |
 |---|---|---|
-| id | Long | カードID（自動採番）。並び替えの「追加順」はこのidの昇順とする |
+| id | Long | カードID（自動採番） |
 | title | String | カードのタイトル |
 | status | Enum | ステータス（TODO / DOING / DONE） |
 | priority | Enum | 優先度（HIGH / MID / LOW）。作成時必須、デフォルトMID |
 | dueDate | LocalDate | 期限。任意項目のためnull許容 |
+| position | Long | 表示順（「追加順」の並び順）。新規作成時は末尾（既存の最大値+1）を採番し、同一列内でのドラッグ&ドロップによる並び替え時に振り直す |
 
-同じ列内でのカードの並び順（手動ドラッグによる並び替え）は、専用の項目を持たず永続化しない。
-表示順はフロントエンド側で「追加順（id昇順）／期限順／優先度順」のいずれかを都度算出する。
+「期限順」「優先度順」への切り替えはフロントエンド側で都度算出し、永続化しない。
 詳細は[API仕様](api.md)を参照。
 
 ## ER図
@@ -31,6 +31,7 @@ erDiagram
         string status
         string priority
         LocalDate dueDate
+        Long position
     }
 ```
 

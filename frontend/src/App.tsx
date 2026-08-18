@@ -1,5 +1,5 @@
 import { useEffect, useState, type DragEvent } from "react";
-import { createCard, getCards, updateCard, updateCardStatus } from "./api/cardApi";
+import { createCard, getCards, reorderCards, updateCard, updateCardStatus } from "./api/cardApi";
 import Board from "./components/Board";
 import CardFormModal from "./components/CardFormModal";
 import type { Card, CardCreateInput, Status } from "./types/card";
@@ -49,18 +49,16 @@ function App() {
     }
   }
 
-  function reorderWithinColumn(draggedCardId: number, targetCardId: number) {
-    setCards((prev) => {
-      const fromIndex = prev.findIndex((card) => card.id === draggedCardId);
-      if (fromIndex === -1) return prev;
+  function computeReorderedCards(prev: Card[], draggedCardId: number, targetCardId: number): Card[] {
+    const fromIndex = prev.findIndex((card) => card.id === draggedCardId);
+    if (fromIndex === -1) return prev;
 
-      const next = [...prev];
-      const [dragged] = next.splice(fromIndex, 1);
-      const toIndex = next.findIndex((card) => card.id === targetCardId);
-      if (toIndex === -1) return prev;
-      next.splice(toIndex, 0, dragged);
-      return next;
-    });
+    const next = [...prev];
+    const [dragged] = next.splice(fromIndex, 1);
+    const toIndex = next.findIndex((card) => card.id === targetCardId);
+    if (toIndex === -1) return prev;
+    next.splice(toIndex, 0, dragged);
+    return next;
   }
 
   async function handleDropOnCard(draggedCardId: number, targetCard: Card) {
@@ -68,7 +66,19 @@ function App() {
     if (!dragged || dragged.id === targetCard.id) return;
 
     if (dragged.status === targetCard.status) {
-      reorderWithinColumn(draggedCardId, targetCard.id);
+      const reordered = computeReorderedCards(cards, draggedCardId, targetCard.id);
+      if (reordered === cards) return;
+      setCards(reordered);
+
+      const cardIdsInStatus = reordered
+        .filter((card) => card.status === dragged.status)
+        .map((card) => card.id);
+      try {
+        await reorderCards(dragged.status, cardIdsInStatus);
+      } catch (err) {
+        alert(err instanceof Error ? err.message : "並び替えの保存に失敗しました");
+        getCards().then(setCards).catch(() => {});
+      }
       return;
     }
 

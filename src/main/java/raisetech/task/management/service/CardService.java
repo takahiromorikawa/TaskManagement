@@ -1,8 +1,11 @@
 package raisetech.task.management.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import raisetech.task.management.entity.Card;
 import raisetech.task.management.entity.Priority;
@@ -19,7 +22,7 @@ public class CardService {
     }
 
     public List<Card> getAllCards() {
-        return cardRepository.findAll();
+        return cardRepository.findAllByOrderByPositionAsc();
     }
 
     public Optional<Card> getCardById(Long id) {
@@ -32,6 +35,7 @@ public class CardService {
         card.setStatus(Status.TODO);
         card.setPriority(priority != null ? priority : Priority.MID);
         card.setDueDate(dueDate);
+        card.setPosition(cardRepository.findMaxPosition() + 1);
         return cardRepository.save(card);
     }
 
@@ -51,5 +55,24 @@ public class CardService {
                     card.setStatus(status);
                     return cardRepository.save(card);
                 });
+    }
+
+    public Optional<List<Card>> reorderCards(Status status, List<Long> cardIds) {
+        List<Card> cards = cardRepository.findAllById(cardIds);
+        boolean invalid = cards.size() != cardIds.size()
+                || cards.stream().anyMatch(card -> card.getStatus() != status);
+        if (invalid) {
+            return Optional.empty();
+        }
+
+        Map<Long, Card> cardsById = cards.stream().collect(Collectors.toMap(Card::getId, card -> card));
+        List<Card> reordered = new ArrayList<>();
+        long position = 0;
+        for (Long id : cardIds) {
+            Card card = cardsById.get(id);
+            card.setPosition(position++);
+            reordered.add(card);
+        }
+        return Optional.of(cardRepository.saveAll(reordered));
     }
 }
