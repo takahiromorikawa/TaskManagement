@@ -103,7 +103,7 @@ function App() {
   return (
     <div className="app">
       <header className="topbar">
-        <h1>TaskManagement</h1>
+        <h1>タスク管理</h1>
         <button type="button" className="btn btn-primary" onClick={() => setIsCreateOpen(true)}>
           + 新規作成
         </button>
