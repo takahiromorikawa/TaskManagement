@@ -157,10 +157,20 @@ aws configure
 
 - `AWS Access Key ID`：手順2-4で控えたアクセスキーID
 - `AWS Secret Access Key`：手順2-4で控えたシークレットアクセスキー
-- `Default region name`：`ap-northeast-1`（東京リージョン）
+- `Default region name`：`us-east-1`（バージニア北部リージョン。本プロジェクトではこのリージョンを使う）
 - `Default output format`：`json`
 
 これらは `~/.aws/credentials` と `~/.aws/config` に保存されます（Gitとは無関係のホームディレクトリ配下です）。
+
+なお、比較的新しいAWS CLIではブラウザでログインする`aws login`方式が案内される場合があります。この場合、
+`~/.aws/config`に静的なアクセスキーではなく`login_session = arn:aws:iam::...`という形で記録されます。
+この方式でも`aws`コマンド自体は問題なく使えますが、**Terraformが内部で使う認証ライブラリはこの方式を直接読み取れません**。
+Terraformを実行する前に、以下のコマンドで一時的な認証情報を環境変数にエクスポートしてください（有効期限があるため、
+切れたら再実行が必要です）。
+
+```bash
+eval "$(aws configure export-credentials --format env)"
+```
 
 ### 3-3. 動作確認
 
@@ -206,7 +216,7 @@ Claude Codeと一緒に以下を行います。
 
 | 用語 | 意味 |
 |---|---|
-| リージョン | AWSのデータセンターがある地理的な場所の単位（例：東京は`ap-northeast-1`） |
+| リージョン | AWSのデータセンターがある地理的な場所の単位（例：バージニア北部は`us-east-1`、東京は`ap-northeast-1`） |
 | アベイラビリティゾーン（AZ） | リージョン内の独立したデータセンター群。障害分離の単位 |
 | IAM | AWSアカウント内のユーザー・権限を管理する仕組み |
 | アクセスキー / シークレットアクセスキー | IAMユーザーがプログラム（CLIやTerraform）からAWSを操作するための認証情報の組 |
