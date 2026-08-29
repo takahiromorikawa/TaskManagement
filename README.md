@@ -37,6 +37,7 @@ Spring Boot（バックエンド）＋ React（フロントエンド）構成で
 | [データベース設計](docs/database.md) | データ項目、ER図 |
 | [API仕様](docs/api.md) | エンドポイント一覧、シーケンス図 |
 | [技術スタック](docs/tech-stack.md) | バックエンド・フロントエンド・DBの技術構成 |
+| [デプロイ手順](docs/deployment.md) | AWS（EC2 + Docker Compose）へのTerraformを使ったデプロイ手順、AWS/IaC/Terraformの解説 |
 
 ## セットアップ
 
