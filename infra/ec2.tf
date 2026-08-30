@@ -16,6 +16,10 @@ data "aws_ami" "amazon_linux" {
 resource "aws_key_pair" "deployer" {
   key_name   = "taskmanagement-deploy-key"
   public_key = file(var.ssh_public_key_path)
+
+  tags = {
+    Name = "taskmanagement-deploy-key"
+  }
 }
 
 resource "aws_instance" "app" {
