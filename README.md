@@ -37,6 +37,7 @@ Spring Boot（バックエンド）＋ React（フロントエンド）構成で
 | [データベース設計](docs/database.md) | データ項目、ER図 |
 | [API仕様](docs/api.md) | エンドポイント一覧、シーケンス図 |
 | [技術スタック](docs/tech-stack.md) | バックエンド・フロントエンド・DBの技術構成 |
+| [インフラ構成](docs/infrastructure.md) | AWSデプロイ環境の構成図、使用サービス、Terraformのディレクトリ構成 |
 
 ## セットアップ
 
