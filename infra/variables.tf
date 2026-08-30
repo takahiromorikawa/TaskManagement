@@ -10,6 +10,30 @@ variable "instance_type" {
   default     = "t2.micro"
 }
 
+variable "db_instance_class" {
+  description = "RDSインスタンスクラス（無料枠対象のdb.t4g.microを推奨）"
+  type        = string
+  default     = "db.t4g.micro"
+}
+
+variable "db_name" {
+  description = "RDSに作成するデータベース名"
+  type        = string
+  default     = "taskdb"
+}
+
+variable "db_username" {
+  description = "RDSのマスターユーザー名"
+  type        = string
+  default     = "postgres"
+}
+
+variable "db_password" {
+  description = "RDSのマスターパスワード（terraform.tfvarsで指定する。Gitにコミットしないこと）"
+  type        = string
+  sensitive   = true
+}
+
 variable "my_ip" {
   description = "SSH接続を許可する自分のグローバルIPアドレス（例: 203.0.113.1/32）"
   type        = string

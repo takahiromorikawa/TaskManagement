@@ -35,7 +35,12 @@ resource "aws_instance" "app" {
   user_data = templatefile("${path.module}/user_data.sh.tpl", {
     github_repo_url = var.github_repo_url
     git_branch      = var.git_branch
+    db_host         = aws_db_instance.postgres.address
+    db_username     = var.db_username
+    db_password     = var.db_password
   })
+  # user_dataは初回起動時にしか実行されないため、内容が変わったら必ずインスタンスを作り直す
+  user_data_replace_on_change = true
 
   tags = {
     Name = "taskmanagement-app"

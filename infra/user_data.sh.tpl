@@ -23,6 +23,9 @@ su - ec2-user -c "git clone --branch '${git_branch}' '${github_repo_url}' /home/
 
 cat > /home/ec2-user/app/.env <<EOF
 PUBLIC_IP=$PUBLIC_IP
+DB_HOST=${db_host}
+DB_USERNAME=${db_username}
+DB_PASSWORD=${db_password}
 EOF
 chown ec2-user:ec2-user /home/ec2-user/app/.env
 

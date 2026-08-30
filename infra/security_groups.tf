@@ -38,3 +38,28 @@ resource "aws_security_group" "ec2" {
     Name = "taskmanagement-ec2-sg"
   }
 }
+
+resource "aws_security_group" "rds" {
+  name        = "taskmanagement-rds-sg"
+  description = "TaskManagement RDS: allow PostgreSQL from the EC2 security group only"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description     = "PostgreSQL (from EC2 security group only)"
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.ec2.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "taskmanagement-rds-sg"
+  }
+}

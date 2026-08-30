@@ -17,3 +17,8 @@ output "ssh_command" {
   description = "EC2へSSH接続するコマンド"
   value       = "ssh -i ~/.ssh/taskmanagement-aws ec2-user@${aws_instance.app.public_ip}"
 }
+
+output "rds_endpoint" {
+  description = "RDSのエンドポイント（EC2からのみ接続可能）"
+  value       = aws_db_instance.postgres.address
+}

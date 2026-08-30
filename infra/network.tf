@@ -24,6 +24,19 @@ resource "aws_subnet" "public" {
   }
 }
 
+# RDSのDBサブネットグループは最低2つのAZにまたがるサブネットが必要なため、別AZにもう1つ作成する
+# （EC2は配置しない。RDS用のためだけの2つ目のサブネット）
+resource "aws_subnet" "public2" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.2.0/24"
+  availability_zone       = data.aws_availability_zones.available.names[1]
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "taskmanagement-public-subnet-2"
+  }
+}
+
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 
@@ -47,5 +60,10 @@ resource "aws_route_table" "public" {
 
 resource "aws_route_table_association" "public" {
   subnet_id      = aws_subnet.public.id
+  route_table_id = aws_route_table.public.id
+}
+
+resource "aws_route_table_association" "public2" {
+  subnet_id      = aws_subnet.public2.id
   route_table_id = aws_route_table.public.id
 }
