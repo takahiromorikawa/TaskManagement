@@ -1,0 +1,8 @@
+# このファイルをコピーして terraform.tfvars を作成し、値を埋めてください。
+# terraform.tfvars はGit管理対象外です（.gitignoreを参照）。
+
+# RDSのマスターパスワード（自分で決める。8文字以上）
+db_password = "change-me-to-a-strong-password"
+
+# SSH接続を許可する自分のグローバルIP。`curl https://checkip.amazonaws.com` の結果に /32 を付ける
+my_ip = "203.0.113.1/32"
